@@ -1,3 +1,27 @@
+# Kelime Defteri (İngilizce Pratik)
+
+Bu proje Flutter ile yazılmış basit bir "kelime listesi" uygulamasıdır.
+
+- Her bir liste alanı `Card` içinde gösterilir.
+- `Liste Oluştur` butonuna basarak yeni alan ekleyebilirsiniz.
+- Her kartın sağında `Listeye Git` ve `Sil` butonları vardır.
+
+Çalıştırma
+
+1. Flutter ortamınızın kurulu olduğundan emin olun.
+2. Proje dizininde terminal açın:
+
+```powershell
+flutter pub get
+flutter run
+```
+
+GitHub
+
+Bu repo GitHub üzerinde: https://github.com/furkycgz/kelime_defteri
+
+İsterseniz README'i genişletebilirim (kullanım, ekran görüntüleri, lisans, vb.).
+
 # ingilizce_pratik
 
 A new Flutter project.
