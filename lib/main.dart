@@ -42,28 +42,42 @@ class _AnaSayfaState extends State<AnaSayfa> {
   Future<void> _loadLists() async {
     if (kIsWeb) {
       setState(() {
-        _lists = List.from(_webLists);
+        // display existing web lists in uppercase
+        _lists = _webLists
+            .map(
+              (e) => {
+                'id': e['id'],
+                'name': (e['name'] as String).toUpperCase(),
+              },
+            )
+            .toList();
       });
       return;
     }
     final lists = await _db.getLists();
     setState(() {
-      _lists = lists;
+      // normalize to uppercase for display
+      _lists = lists
+          .map(
+            (e) => {'id': e['id'], 'name': (e['name'] as String).toUpperCase()},
+          )
+          .toList();
     });
   }
 
   Future<void> _createListFromName(String name) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
+    final upper = trimmed.toUpperCase();
     try {
       if (kIsWeb) {
         final id = DateTime.now().microsecondsSinceEpoch;
-        _webLists.insert(0, {'id': id, 'name': trimmed});
+        _webLists.insert(0, {'id': id, 'name': upper});
         setState(() {
           _lists = List.from(_webLists);
         });
       } else {
-        await _db.createList(trimmed);
+        await _db.createList(upper);
         await _loadLists();
       }
       if (!mounted) return;
@@ -87,6 +101,10 @@ class _AnaSayfaState extends State<AnaSayfa> {
         content: TextField(
           controller: _newListController,
           autofocus: true,
+          keyboardType: TextInputType.text,
+          textCapitalization: TextCapitalization.none,
+          enableSuggestions: true,
+          autocorrect: true,
           decoration: const InputDecoration(
             labelText: 'Liste Adı',
             border: OutlineInputBorder(),
