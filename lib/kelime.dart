@@ -57,7 +57,18 @@ class _KelimePageState extends State<KelimePage> {
       return;
     }
     try {
+      // Prevent duplicates (case-insensitive by word)
       if (kIsWeb) {
+        final existing = (_webStore[widget.listId] ?? []).any(
+          (e) => (e['word'] as String).toLowerCase() == kelime.toLowerCase(),
+        );
+        if (existing) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Bu kelime listede zaten var.')),
+          );
+          return;
+        }
         final id = DateTime.now().microsecondsSinceEpoch;
         final entry = {
           'id': id,
@@ -71,6 +82,14 @@ class _KelimePageState extends State<KelimePage> {
           _entries = List.from(_webStore[widget.listId]!);
         });
       } else {
+        final exists = await _db.itemExists(widget.listId, kelime);
+        if (exists) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Bu kelime listede zaten var.')),
+          );
+          return;
+        }
         await _db.addItem(widget.listId, kelime, anlam);
         await _loadItems();
       }
@@ -109,6 +128,10 @@ class _KelimePageState extends State<KelimePage> {
                 Expanded(
                   child: TextField(
                     controller: _kelimeController,
+                    keyboardType: TextInputType.text,
+                    textCapitalization: TextCapitalization.none,
+                    enableSuggestions: true,
+                    autocorrect: true,
                     decoration: const InputDecoration(
                       labelText: 'Kelime (ör: pencil)',
                       border: OutlineInputBorder(),
@@ -119,6 +142,10 @@ class _KelimePageState extends State<KelimePage> {
                 Expanded(
                   child: TextField(
                     controller: _anlamController,
+                    keyboardType: TextInputType.text,
+                    textCapitalization: TextCapitalization.none,
+                    enableSuggestions: true,
+                    autocorrect: true,
                     decoration: const InputDecoration(
                       labelText: 'Anlamı (ör: kalem)',
                       border: OutlineInputBorder(),

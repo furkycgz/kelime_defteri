@@ -71,6 +71,16 @@ class DBHelper {
     });
   }
 
+  Future<bool> itemExists(int listId, String word) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as c FROM items WHERE list_id = ? AND LOWER(word) = LOWER(?)',
+      [listId, word],
+    );
+    final count = Sqflite.firstIntValue(result) ?? 0;
+    return count > 0;
+  }
+
   Future<List<Map<String, dynamic>>> getItems(int listId) async {
     final db = await database;
     return await db.query(
