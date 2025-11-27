@@ -30,10 +30,22 @@ class _TestPageState extends State<TestPage> {
   List<String> _choices = [];
   int _correctChoiceIndex = 0;
 
+  // timers for question and transition
+  Timer? _questionTimer;
+  Timer? _transitionTimer;
+  int _remaining = 10; // seconds per question
+
   @override
   void initState() {
     super.initState();
     _prepare();
+  }
+
+  @override
+  void dispose() {
+    _questionTimer?.cancel();
+    _transitionTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _prepare() async {
@@ -43,7 +55,6 @@ class _TestPageState extends State<TestPage> {
       _items = await _db.getItems(widget.listId);
     }
     if (_items.length < 4) {
-      // shouldn't happen because caller checks, but guard
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -52,7 +63,6 @@ class _TestPageState extends State<TestPage> {
       }
       return;
     }
-    // create order (shuffle indices)
     _order = List.generate(_items.length, (i) => i);
     _order.shuffle(Random());
     _current = 0;
@@ -64,9 +74,11 @@ class _TestPageState extends State<TestPage> {
   void _prepareQuestion() {
     _answered = false;
     _selectedIndex = null;
+    _remaining = 10;
+    _startQuestionTimer();
+
     final idx = _order[_current];
     final correctMeaning = _items[idx]['meaning'] as String;
-    // get other meanings
     final otherMeanings = _items
         .where((e) => e != _items[idx])
         .map((e) => e['meaning'] as String)
@@ -80,23 +92,54 @@ class _TestPageState extends State<TestPage> {
     _correctChoiceIndex = _choices.indexOf(correctMeaning);
   }
 
+  void _startQuestionTimer() {
+    _questionTimer?.cancel();
+    _questionTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      setState(() {
+        _remaining--;
+      });
+      if (_remaining <= 0) {
+        t.cancel();
+        if (!_answered) {
+          setState(() {
+            _answered = true;
+            _selectedIndex = null;
+          });
+          _transitionTimer?.cancel();
+          _transitionTimer = Timer(const Duration(seconds: 1), () {
+            if (!mounted) return;
+            if (_current + 1 >= _order.length)
+              _showResult();
+            else {
+              setState(() {
+                _current++;
+                _prepareQuestion();
+              });
+            }
+          });
+        }
+      }
+    });
+  }
+
   void _onSelect(int i) {
     if (_answered) return;
+    _questionTimer?.cancel();
     setState(() {
       _answered = true;
       _selectedIndex = i;
-      if (i == _correctChoiceIndex) {
-        _score++;
-      }
+      if (i == _correctChoiceIndex) _score++;
     });
-    // move to next after short delay
-    Timer(const Duration(seconds: 1), () {
-      if (!mounted) {
-        return;
-      }
-      if (_current + 1 >= _order.length) {
+    _transitionTimer?.cancel();
+    _transitionTimer = Timer(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      if (_current + 1 >= _order.length)
         _showResult();
-      } else {
+      else {
         setState(() {
           _current++;
           _prepareQuestion();
@@ -123,7 +166,6 @@ class _TestPageState extends State<TestPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              // restart
               setState(() {
                 _order.shuffle(Random());
                 _current = 0;
@@ -155,9 +197,38 @@ class _TestPageState extends State<TestPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Soru ${_current + 1} / ${_order.length}',
-              style: const TextStyle(fontSize: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Soru ${_current + 1} / ${_order.length}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                // circular timer
+                SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: _remaining / 10,
+                        strokeWidth: 6,
+                        color: Colors.blueAccent,
+                        backgroundColor: Colors.grey[300],
+                      ),
+                      Text(
+                        '$_remaining',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Card(

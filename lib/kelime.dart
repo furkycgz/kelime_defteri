@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'db_helper.dart';
 import 'test.dart';
 
@@ -125,18 +126,22 @@ class _KelimePageState extends State<KelimePage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final title = (widget.listeAdi == null || widget.listeAdi!.isEmpty)
         ? 'Kelime Listesi'
         : widget.listeAdi!;
+
     return Stack(
       children: [
         Scaffold(
           floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: const Color.fromARGB(255, 243, 243, 2),
             onPressed: () {
-              // Start test only if at least 4 entries
               if (_entries.length < 4) {
-                _showCenterMessage('Yeterli kelime yok. Yeterli kelime = 4');
+                _showCenterMessage(
+                  'Yeterli kelime yok. En az 4 kelime ekleyin.',
+                );
                 return;
               }
               Navigator.push(
@@ -150,69 +155,131 @@ class _KelimePageState extends State<KelimePage> {
                 ),
               );
             },
-            label: const Text('Test Et'),
-            icon: const Icon(Icons.quiz),
+            label: const Text(
+              'Test Et',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            icon: const Icon(Icons.quiz, size: 28),
           ),
-          appBar: AppBar(title: Text(title)),
+
+          appBar: AppBar(
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            elevation: 4,
+            centerTitle: true,
+            backgroundColor: Colors.deepPurple,
+          ),
+
           body: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _kelimeController,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.none,
-                        enableSuggestions: true,
-                        autocorrect: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Kelime (ör: pencil)',
-                          border: OutlineInputBorder(),
+                // 🔵 EKLEME BÖLÜMÜ - Modern Kart
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _kelimeController,
+                                decoration: InputDecoration(
+                                  labelText: 'Kelime (ör: pencil)',
+                                  prefixIcon: const Icon(Icons.edit),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: _anlamController,
+                                decoration: InputDecoration(
+                                  labelText: 'Anlamı (ör: kalem)',
+                                  prefixIcon: const Icon(Icons.translate),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _anlamController,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.none,
-                        enableSuggestions: true,
-                        autocorrect: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Anlamı (ör: kalem)',
-                          border: OutlineInputBorder(),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: _addEntry,
+                                icon: const Icon(Icons.add),
+                                label: const Text('Ekle'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    1,
+                                    255,
+                                    238,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  _kelimeController.clear();
+                                  _anlamController.clear();
+                                },
+                                icon: const Icon(Icons.clear),
+                                label: const Text('Temizle'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  side: const BorderSide(
+                                    color: Colors.deepPurple,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _addEntry,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Ekle'),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _kelimeController.clear();
-                        _anlamController.clear();
-                      },
-                      icon: const Icon(Icons.clear),
-                      label: const Text('Temizle'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
+
+                const SizedBox(height: 10),
                 const Divider(),
+
                 Expanded(
                   child: _entries.isEmpty
-                      ? const Center(child: Text('Henüz kelime yok. Ekleyin.'))
+                      ? const Center(
+                          child: Text(
+                            'Henüz kelime yok.\nHemen ekleyin.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        )
                       : ListView.builder(
                           itemCount: _entries.length,
                           itemBuilder: (context, index) {
@@ -220,10 +287,32 @@ class _KelimePageState extends State<KelimePage> {
                             final id = entry['id'] as int;
                             final word = entry['word'] as String;
                             final meaning = entry['meaning'] as String;
+
                             return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 6.0),
+                              elevation: 3,
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               child: ListTile(
-                                title: Text('$word->$meaning'),
+                                title: Text(
+                                  word,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  meaning,
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.deepPurple,
+                                  child: Text(
+                                    word.substring(0, 1).toUpperCase(),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
                                 trailing: IconButton(
                                   icon: const Icon(
                                     Icons.delete,
@@ -240,48 +329,70 @@ class _KelimePageState extends State<KelimePage> {
             ),
           ),
         ),
-        // Centered warning card overlay
+
+        // 🎛 Modern Uyarı Kutusu — blurred dim background + elevated card
         if (_centerMessage != null)
           Positioned.fill(
-            child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _centerMessage = null;
-                  });
-                },
-                child: Card(
-                  elevation: 8,
-                  color: Colors.yellow[100],
-                  margin: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 16.0,
+            child: GestureDetector(
+              onTap: () => setState(() => _centerMessage = null),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 180),
+                opacity: 1.0,
+                child: Stack(
+                  children: [
+                    // blurred dim layer
+                    BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                      child: Container(color: Colors.black45),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.warning, color: Colors.black87),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Text(
-                            _centerMessage!,
-                            style: const TextStyle(fontSize: 16),
+                    // centered card
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: Card(
+                          elevation: 14,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 18,
+                              horizontal: 18,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Colors.deepOrange,
+                                  child: const Icon(
+                                    Icons.warning_amber,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    _centerMessage!,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                TextButton(
+                                  onPressed: () =>
+                                      setState(() => _centerMessage = null),
+                                  child: const Text('Kapat'),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () {
-                            setState(() {
-                              _centerMessage = null;
-                            });
-                          },
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
