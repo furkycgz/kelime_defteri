@@ -58,7 +58,7 @@ class _TestPageState extends State<TestPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Yeterli kelime yok.')));
+        ).showSnackBar(const SnackBar(content: Text('En az 4 kelime olmalı.')));
         Navigator.pop(context);
       }
       return;

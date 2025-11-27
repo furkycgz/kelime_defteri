@@ -139,9 +139,7 @@ class _KelimePageState extends State<KelimePage> {
             backgroundColor: const Color.fromARGB(255, 243, 243, 2),
             onPressed: () {
               if (_entries.length < 4) {
-                _showCenterMessage(
-                  'Yeterli kelime yok. En az 4 kelime ekleyin.',
-                );
+                _showCenterMessage('En az 4 kelime olmalı.');
                 return;
               }
               Navigator.push(
@@ -192,7 +190,9 @@ class _KelimePageState extends State<KelimePage> {
                               child: TextField(
                                 controller: _kelimeController,
                                 decoration: InputDecoration(
-                                  labelText: 'Kelime (ör: pencil)',
+                                  labelText: 'Kelime',
+                                  hintText: 'ör: pencil',
+                                  isDense: true,
                                   prefixIcon: const Icon(Icons.edit),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -205,7 +205,9 @@ class _KelimePageState extends State<KelimePage> {
                               child: TextField(
                                 controller: _anlamController,
                                 decoration: InputDecoration(
-                                  labelText: 'Anlamı (ör: kalem)',
+                                  labelText: 'Anlam',
+                                  hintText: 'ör: kalem',
+                                  isDense: true,
                                   prefixIcon: const Icon(Icons.translate),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
