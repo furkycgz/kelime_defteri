@@ -43,6 +43,6 @@ samples, guidance on mobile development, and a full API reference.
 
 You can download the debug APK for Android from this repository and install it on your device (enable installation from unknown sources):
 
-- Direct download (raw): https://raw.githubusercontent.com/furkycgz/kelime_defteri/master/releases/app-debug.apk
+- Direct download (release): https://github.com/furkycgz/kelime_defteri/releases/download/v0.1.0/app-debug.apk
 
 Note: This is a debug-signed APK for testing. For production distribution, build a signed release APK or an AAB and publish via Google Play.
