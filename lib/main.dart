@@ -68,7 +68,13 @@ class _AnaSayfaState extends State<AnaSayfa> {
 
   Future<void> _createListFromName(String name) async {
     final trimmed = name.trim();
-    if (trimmed.isEmpty) return;
+    if (trimmed.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Liste başlığı boş bırakılmamalı.')));
+      return;
+    }
     final upper = trimmed.toUpperCase();
     try {
       if (kIsWeb) {
@@ -103,12 +109,18 @@ class _AnaSayfaState extends State<AnaSayfa> {
           'Yeni Liste Oluştur',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: TextField(
-          controller: _newListController,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: 'Liste Başlığı Giriniz',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        content: Builder(
+          builder: (ctx) => TextField(
+            controller: _newListController,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => Navigator.pop(ctx, true),
+            decoration: InputDecoration(
+              labelText: 'Liste Başlığı Giriniz',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ),
         actions: [
@@ -229,6 +241,15 @@ class _AnaSayfaState extends State<AnaSayfa> {
                           elevation: 3,
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) =>
+                                      KelimePage(listId: id, listeAdi: name),
+                                ),
+                              );
+                            },
                             contentPadding: const EdgeInsets.all(16),
                             title: Text(
                               name,

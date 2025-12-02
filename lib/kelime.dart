@@ -68,9 +68,7 @@ class _KelimePageState extends State<KelimePage> {
     final kelime = _kelimeController.text.trim();
     final anlam = _anlamController.text.trim();
     if (kelime.isEmpty || anlam.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kelime ve anlam boş olmamalı.')),
-      );
+      _showCenterMessage('Kelime ve anlam boş bırakılmamalı.');
       return;
     }
     try {
@@ -189,6 +187,8 @@ class _KelimePageState extends State<KelimePage> {
                             Expanded(
                               child: TextField(
                                 controller: _kelimeController,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) => _addEntry(),
                                 decoration: InputDecoration(
                                   labelText: 'Kelime',
                                   hintText: 'ör: pencil',
@@ -204,6 +204,8 @@ class _KelimePageState extends State<KelimePage> {
                             Expanded(
                               child: TextField(
                                 controller: _anlamController,
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _addEntry(),
                                 decoration: InputDecoration(
                                   labelText: 'Anlam',
                                   hintText: 'ör: kalem',
